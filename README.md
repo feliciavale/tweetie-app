@@ -57,13 +57,3 @@ Tweetie is a full-stack Twitter/X clone built with Next.js (App Router), TypeScr
 
    Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-## Deployment
-
-Tweetie is deployed on [Vercel](https://vercel.com). To deploy your own instance:
-
-1. Push the repo to GitHub.
-2. Import the project into Vercel.
-3. Add `DATABASE_URL` and `JWT_SECRET` as environment variables in the Vercel project settings.
-4. Run `npx prisma migrate deploy` against your production database before (or right after) the first deploy.
-
-## Project structure
