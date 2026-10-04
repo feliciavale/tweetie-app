@@ -21,7 +21,7 @@ export async function POST(
   if (existing) {
     await prisma.repost.delete({ where: { id: existing.id } });
   } else {
-    await prisma.like.create({ data: { userId, postId } });
+    await prisma.repost.create({ data: { userId, postId } });
 
     const post = await prisma.post.findUnique({
       where: { id: postId },
