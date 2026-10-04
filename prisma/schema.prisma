@@ -1,0 +1,138 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url   = env("DATABASE_URL")
+}
+
+model User {
+  id    String @id @default(cuid())
+  username String @unique
+  email String @unique
+  password String
+  bio String?
+  avatarUrl String? @db.Text
+  bannerUrl String? @db.Text
+  isPrivate Boolean @default(false)
+  notifyOnLike Boolean @default(true)
+  notifyOnRepost Boolean @default(true)
+  notifyOnReply Boolean @default(true)
+  notifyOnFollow Boolean @default(true)
+  notifyOnMessage Boolean @default(true)
+  createdAt DateTime @default(now())
+  posts Post[]
+  likes Like[]
+  reposts Repost[]
+  comments Comment[]
+  sentMessages Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+  following Follow[] @relation("FollowerRelation")
+  followers Follow[] @relation("FollowingRelation")
+  notificationsReceived Notification[] @relation("NotificationsReceived")
+  notificationsSent Notification[] @relation("NotificationsSent")
+}
+
+model Post {
+  id     String @id @default(cuid())
+  content String
+  authorId String
+  author User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  likes Like[]
+  reposts Repost[]
+  comments Comment[]
+  notifications Notification[]
+
+  quotedPostId String?
+  quotedPost   Post?  @relation("QuotedPost", fields: [quotedPostId], references: [id], onDelete: SetNull)
+  quotes       Post[] @relation("QuotedPost")
+}
+model Like {
+ id    String @id @default(cuid())
+ userId String
+ postId String
+ createdAt DateTime @default(now())
+ user    User @relation(fields: [userId], references: [id])
+ post    Post @relation(fields: [postId], references: [id])
+
+    @@unique([userId, postId])
+}
+
+model Repost {
+ id    String @id @default(cuid())
+ userId String
+ postId String
+ createdAt DateTime @default(now())
+ user   User @relation(fields: [userId], references: [id])
+ post   Post @relation(fields: [postId], references: [id])
+
+    @@unique([userId, postId])
+}
+
+model Comment {
+ id     String @id @default(cuid())
+ content String
+ authorId String
+ postId String
+ parentId String?
+ createdAt DateTime @default(now())
+
+    author User   @relation(fields: [authorId], references: [id])
+    post    Post @relation(fields: [postId], references: [id])
+    parent Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+    replies Comment[] @relation("CommentReplies")
+}
+
+model Message {
+  id String @id @default(cuid())
+  content String
+  senderId String
+  receiverId String
+  createdAt DateTime @default(now())
+  readAt DateTime?
+
+  sender   User @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@index([senderId, receiverId])
+  @@index([receiverId, senderId])
+}
+
+enum FollowStatus {
+  PENDING
+  ACCEPTED
+}
+
+model Follow {
+  id String @id @default(cuid())
+  followerId String
+  followingId String
+  status FollowStatus @default(ACCEPTED)
+  createdAt DateTime @default(now())
+
+  follower  User @relation("FollowerRelation", fields: [followerId], references: [id])
+  following User @relation("FollowingRelation", fields: [followingId], references: [id])
+  notifications Notification[]
+
+  @@unique([followerId, followingId])
+}
+
+model Notification {
+  id String @id @default(cuid())
+  type String
+  recipientId String
+  actorId String
+  postId String?
+  followId String?
+  createdAt DateTime @default(now())
+  read Boolean @default(false)
+
+  recipient User @relation("NotificationsReceived", fields: [recipientId], references: [id])
+  actor     User @relation("NotificationsSent", fields: [actorId], references: [id])
+  post      Post? @relation(fields: [postId], references: [id])
+  follow    Follow? @relation(fields: [followId], references: [id])
+
+  @@index([recipientId, createdAt])
+}
