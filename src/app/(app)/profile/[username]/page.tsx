@@ -6,6 +6,7 @@ import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import PostCard from "@/components/PostCard";
 import FollowButton from "@/components/FollowButton";
+import ProfileStats from "@/components/ProfileStats";
 import { MessageIcon } from "@/components/icons";
 import { useCurrentUser } from "@/context/CurrentUserContext";
 
@@ -35,6 +36,9 @@ interface Profile {
   followStatus: "none" | "pending" | "accepted";
   avatarUrl?: string | null;
   bannerUrl?: string | null;
+  postCount: number;
+  followerCount: number;
+  followingCount: number;
 }
 
 export default function PublicProfilePage() {
@@ -84,7 +88,19 @@ export default function PublicProfilePage() {
   }, [params.username]);
 
   function handleFollowStatusChange(status: "none" | "pending" | "accepted") {
-    setProfile((prev) => (prev ? { ...prev, followStatus: status } : prev));
+    setProfile((prev) => {
+      if (!prev) return prev;
+      // Only accepted follows count, so adjust the follower count when we
+      // move into or out of "accepted".
+      const delta =
+        (status === "accepted" ? 1 : 0) -
+        (prev.followStatus === "accepted" ? 1 : 0);
+      return {
+        ...prev,
+        followStatus: status,
+        followerCount: Math.max(0, prev.followerCount + delta),
+      };
+    });
     loadPosts();
   }
 
@@ -200,6 +216,11 @@ export default function PublicProfilePage() {
         <p className="mt-3 text-sm text-[#2A1F16] leading-relaxed max-w-[420px]">
           {profile?.bio && profile.bio.trim().length > 0 ? profile.bio : ""}
         </p>
+        <ProfileStats
+          postCount={profile?.postCount}
+          followerCount={profile?.followerCount}
+          followingCount={profile?.followingCount}
+        />
       </div>
 
       <div className="px-5 py-3 border-b border-[#2A1F16]/10">

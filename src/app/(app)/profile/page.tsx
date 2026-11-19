@@ -5,6 +5,7 @@ import Link from "next/link";
 import Avatar from "@/components/Avatar";
 import PostCard from "@/components/PostCard";
 import EditProfileModal from "@/components/EditProfileModal";
+import ProfileStats from "@/components/ProfileStats";
 import { useCurrentUser } from "@/context/CurrentUserContext";
 
 interface Post {
@@ -32,6 +33,9 @@ interface Me {
   bio?: string | null;
   avatarUrl?: string | null;
   bannerUrl?: string | null;
+  postCount?: number;
+  followerCount?: number;
+  followingCount?: number;
 }
 
 export default function ProfilePage() {
@@ -115,7 +119,15 @@ export default function ProfilePage() {
         return prev.filter((p) => p.id !== id);
       });
       const res = await fetch(`/api/posts/${id}`, { method: "DELETE" });
-      if (!res.ok) setter(previous);
+      if (!res.ok) {
+        setter(previous);
+      } else if (tab === "posts") {
+        setMe((prev) =>
+          prev && prev.postCount !== undefined
+            ? { ...prev, postCount: Math.max(0, prev.postCount - 1) }
+            : prev,
+        );
+      }
     }
 
     return { handleLike, handleRepost, handleDelete };
@@ -168,6 +180,11 @@ export default function ProfilePage() {
             ? me.bio
             : "Write a short line about yourself here."}
         </p>
+        <ProfileStats
+          postCount={me?.postCount}
+          followerCount={me?.followerCount}
+          followingCount={me?.followingCount}
+        />
       </div>
 
       <div className="flex border-b border-[#2A1F16]/10">

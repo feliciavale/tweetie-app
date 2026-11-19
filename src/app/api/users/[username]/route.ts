@@ -22,6 +22,13 @@ export async function GET(
       isPrivate: true,
       avatarUrl: true,
       bannerUrl: true,
+      _count: {
+        select: {
+          posts: true,
+          followers: { where: { status: "ACCEPTED" } },
+          following: { where: { status: "ACCEPTED" } },
+        },
+      },
     },
   });
 
@@ -50,5 +57,8 @@ export async function GET(
     bannerUrl: user.bannerUrl,
     isMe,
     followStatus,
+    postCount: user._count.posts,
+    followerCount: user._count.followers,
+    followingCount: user._count.following,
   });
 }

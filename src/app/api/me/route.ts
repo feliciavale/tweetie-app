@@ -18,6 +18,13 @@ export async function GET() {
       isPrivate: true,
       avatarUrl: true,
       bannerUrl: true,
+      _count: {
+        select: {
+          posts: true,
+          followers: { where: { status: "ACCEPTED" } },
+          following: { where: { status: "ACCEPTED" } },
+        },
+      },
     },
   });
 
@@ -25,7 +32,13 @@ export async function GET() {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  return NextResponse.json(user);
+  const { _count, ...rest } = user;
+  return NextResponse.json({
+    ...rest,
+    postCount: _count.posts,
+    followerCount: _count.followers,
+    followingCount: _count.following,
+  });
 }
 
 export async function PATCH(request: Request) {
