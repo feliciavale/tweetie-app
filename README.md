@@ -4,10 +4,23 @@ Tweetie is a full-stack Twitter/X clone built with **Next.js (App Router)**, **T
 
 **Live demo:** [tweetie-app.vercel.app](https://tweetie-app.vercel.app)
 
+**Status:** ✅ Complete. The project is finished and no longer under active development.
+
+## About the project
+
+Tweetie was built as a hands-on project for learning how to build a modern full-stack web app from start to finish. It covers:
+
+- Designing a relational schema for a social network (follows, likes, reposts, nested comments, notifications) and evolving it through migrations.
+- Building an authenticated REST-style API with Next.js route handlers, validating every input with Zod.
+- Handling privacy rules on the server (private accounts, follow requests).
+- Delivering real-time updates with Server-Sent Events.
+- Deploying to Vercel with a managed Postgres database.
+
 ---
 
 ## Table of contents
 
+- [About the project](#about-the-project)
 - [Features](#features)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
@@ -24,7 +37,9 @@ Tweetie is a full-stack Twitter/X clone built with **Next.js (App Router)**, **T
 - [How it works](#how-it-works)
 - [Deployment (Vercel)](#deployment-vercel)
 - [Troubleshooting](#troubleshooting)
-- [Roadmap](#roadmap)
+- [Known limitations](#known-limitations)
+- [What I learned](#what-i-learned)
+- [License](#license)
 
 ---
 
@@ -314,9 +329,9 @@ All routes live under `/api`. Every route except register and login requires the
    ```
 5. Every push to `main` triggers a new production deployment.
 
-> **Note on real-time:** `eventbus.ts` keeps SSE connections in memory, which works on a single server. On Vercel, requests can be handled by different serverless instances, so live pushes may be missed and the polling fallback takes over. For fully reliable real-time delivery in production, replace the event bus with a shared pub/sub service (Postgres `LISTEN/NOTIFY`, Redis, Pusher or Ably).
-
 > **If a new deployment doesn't go live:** after an **Instant Rollback**, Vercel stops auto-promoting new builds. Open **Deployments**, click **⋯** on the latest one and choose **Promote**.
+
+> **Note on real-time:** `eventbus.ts` keeps SSE connections in memory, which works on a single server. On Vercel, requests can be handled by different serverless instances, so live pushes may be missed and the polling fallback takes over. For fully reliable real-time delivery in production, replace the event bus with a shared pub/sub service (Postgres `LISTEN/NOTIFY`, Redis, Pusher or Ably).
 
 ---
 
@@ -334,13 +349,33 @@ All routes live under `/api`. Every route except register and login requires the
 
 ---
 
-## Roadmap
+## Known limitations
 
-- [ ] Hide private accounts' posts from the home feed unless you're an approved follower
-- [ ] Cursor-based pagination and infinite scroll for feeds
-- [ ] Store images in object storage (Vercel Blob / S3) instead of base64 in the database
-- [ ] Restrict usernames to letters, numbers and underscores
-- [ ] Shared pub/sub for real-time notifications across serverless instances
-- [ ] Rate limiting on login and registration
-- [ ] Clickable follower and following lists
-- [ ] Cascade deletes so accounts can be removed cleanly
+Tweetie is complete as a project, but it isn't hardened for large-scale production use. Known trade-offs:
+
+- **Home feed privacy:** the home feed lists all posts, including posts from private accounts. Private posts are hidden on profile pages but not filtered from the feed.
+- **No pagination:** feeds and post lists load every result at once.
+- **Images in the database:** avatars and banners are stored as base64 strings in Postgres rather than in object storage.
+- **Username format:** usernames are checked for length only, not for allowed characters.
+- **Real-time on serverless:** the SSE event bus is in memory, so on Vercel live pushes can be missed and polling takes over.
+- **No rate limiting** on login or registration.
+- **Account deletion:** relations don't cascade, so deleting a user requires removing their related records first.
+
+Anyone extending the project would naturally tackle these next. Clickable follower and following lists would be a good addition too.
+
+---
+
+## What I learned
+
+- Modelling many-to-many relationships (follows, likes, reposts) and self-relations (quote posts, comment threads) in Prisma.
+- Using Prisma's filtered `_count` to compute stats such as follower counts without extra queries.
+- Keeping auth secure with httpOnly cookies and server-side checks rather than relying on the client.
+- Optimistic UI updates that roll back cleanly when a request fails.
+- The trade-offs of real-time features on serverless platforms.
+- A full workflow with local databases (`prisma dev`), migrations and continuous deployment on Vercel.
+
+---
+
+## License
+
+This project was built for learning and portfolio purposes. Feel free to explore the code and use it as a reference.
