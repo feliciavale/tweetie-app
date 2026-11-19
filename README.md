@@ -4,8 +4,6 @@ Tweetie is a full-stack Twitter/X clone built with **Next.js (App Router)**, **T
 
 **Live demo:** [tweetie-app.vercel.app](https://tweetie-app.vercel.app)
 
-**Status:** ✅ Complete. The project is finished and no longer under active development.
-
 ## About the project
 
 Tweetie was built as a hands-on project for learning how to build a modern full-stack web app from start to finish. It covers:
