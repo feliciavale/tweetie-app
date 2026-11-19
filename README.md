@@ -2,7 +2,7 @@
 
 Tweetie is a full-stack Twitter/X clone built with **Next.js (App Router)**, **TypeScript** and **PostgreSQL via Prisma**. It covers the core of a social network: posts, likes, reposts, quote posts, threaded comments, follows (including private accounts with follow requests), profile stats, direct messages and real-time notifications.
 
-**Live demo:** [tweetie-app.vercel.app](https://tweetie-app.vercel.app)
+**Live demo:** [tweetie-app.vercel.app](https://tweetie-app.vercel.app/)
 
 ## About the project
 
